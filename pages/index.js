@@ -1,403 +1,402 @@
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Link from "next/link";
 
-const TrumpHead = ({ size = 80 }) => (
-  <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
-    <circle cx="40" cy="40" r="40" fill="#FFE0B2"/>
-    <path d="M13 30C11 15 24 5 40 7C56 5 69 15 67 30C62 19 50 16 40 17C30 17 18 19 13 30Z" fill="#F2C240"/>
-    <path d="M13 30C9 34 10 40 14 37C12 42 15 44 17 42C15 48 20 48 22 45" fill="#F2C240"/>
-    <path d="M20 32C20 24 28 18 40 18C52 18 60 24 60 32L60 50C60 60 51 68 40 68C29 68 20 60 20 50Z" fill="#FFCBAA"/>
-    <path d="M22 32C22 26 29 21 40 21C51 21 58 26 58 32L58 36C48 33 32 33 22 36Z" fill="#FFB07A" opacity=".3"/>
-    <ellipse cx="31" cy="39" rx="4" ry="3.5" fill="#282828"/>
-    <ellipse cx="49" cy="39" rx="4" ry="3.5" fill="#282828"/>
-    <ellipse cx="32.2" cy="37.8" rx="1.4" ry="1.1" fill="white" opacity=".55"/>
-    <ellipse cx="50.2" cy="37.8" rx="1.4" ry="1.1" fill="white" opacity=".55"/>
-    <path d="M26 34C28.5 32 35 32 36.5 33.5" stroke="#B8780A" strokeWidth="2.2" strokeLinecap="round"/>
-    <path d="M43.5 33.5C45 32 51.5 32 54 34" stroke="#B8780A" strokeWidth="2.2" strokeLinecap="round"/>
-    <path d="M37 43L35 52C37 54 43 54 45 52L43 43Z" fill="#F0A875" stroke="#E09060" strokeWidth=".5"/>
-    <path d="M30 58C33 56 47 56 50 58C47 62 33 62 30 58Z" fill="#C86644"/>
-    <path d="M30 58C33 59.5 47 59.5 50 58" stroke="#AA4433" strokeWidth=".8"/>
-    <ellipse cx="19" cy="44" rx="4.5" ry="6" fill="#FFCBAA"/>
-    <ellipse cx="61" cy="44" rx="4.5" ry="6" fill="#FFCBAA"/>
-    <path d="M35 68L37 71L40 80L43 71L45 68C43 66 37 66 35 68Z" fill="#CC2020"/>
-    <path d="M37 71L40 80L43 71L41 73.5L39 73.5Z" fill="#AA0E0E"/>
+const V = {
+  TRUE:       { bg:"#E8F9ED", color:"#1a7a35", label:"✅ True",       short:"TRUE"  },
+  FALSE:      { bg:"#FFF0EF", color:"#CC0000", label:"❌ False",      short:"FALSE" },
+  MIXED:      { bg:"#FFF4E5", color:"#8B4800", label:"🤔 Mixed",      short:"MIXED" },
+  UNVERIFIED: { bg:"#F5F5F5", color:"#555",    label:"❓ Unverified", short:"UNVERIFIED" },
+};
+
+const CONF_LABELS = { 5:"Very High", 4:"High", 3:"Medium", 2:"Low", 1:"Very Low" };
+const CONF_COLORS = { 5:"#1a7a35", 4:"#1a7a35", 3:"#8B4800", 2:"#CC0000", 1:"#CC0000" };
+
+const gradeColor = g => {
+  if (!g) return "#999";
+  const l=g[0];
+  if (l==="A") return "#1a7a35";
+  if (l==="B") return "#2d7a2d";
+  if (l==="C") return "#8B4800";
+  if (l==="D") return "#CC3300";
+  return "#CC0000";
+};
+
+const WorldMap = () => (
+  <svg style={{position:"fixed",top:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:800,height:"100%",opacity:0.045,zIndex:0,pointerEvents:"none"}} viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid meet">
+    <path d="M120,60 L180,40 L220,50 L250,80 L260,120 L240,160 L220,200 L200,220 L180,240 L160,260 L140,280 L120,260 L100,240 L90,200 L95,160 L100,120 L110,90 Z" fill="#1A1A1A"/>
+    <path d="M200,280 L240,270 L270,290 L280,330 L275,380 L260,420 L240,440 L220,430 L200,400 L190,360 L185,320 L190,290 Z" fill="#1A1A1A"/>
+    <path d="M440,60 L480,50 L510,60 L520,80 L510,100 L490,110 L470,120 L450,110 L440,90 Z" fill="#1A1A1A"/>
+    <path d="M450,130 L490,120 L520,130 L540,160 L550,200 L545,250 L530,300 L510,330 L490,340 L470,330 L450,300 L440,260 L435,210 L440,170 Z" fill="#1A1A1A"/>
+    <path d="M530,40 L620,30 L720,40 L800,60 L840,80 L860,110 L850,140 L820,160 L780,170 L740,160 L700,150 L660,160 L630,150 L600,130 L570,110 L540,90 L525,70 Z" fill="#1A1A1A"/>
+    <path d="M760,300 L820,290 L860,300 L880,330 L875,370 L850,390 L810,395 L775,380 L755,350 L750,320 Z" fill="#1A1A1A"/>
+    <path d="M260,20 L310,15 L330,30 L320,55 L290,60 L265,50 Z" fill="#1A1A1A"/>
   </svg>
 );
 
-const QUIPS = [
-  "Searching today's news for Trump statements…",
-  "Scanning speeches, rallies & Truth Social…",
-  "Pulling the freshest headlines from news outlets…",
-  "Cross-referencing claims with reality…",
-  "Checking articles, press conferences & interviews…",
-  "Fact-checkers working very hard right now…",
-  "Almost done — calculating the daily score…",
-];
-
-const V = {
-  TRUE:       { bg:"#E8F9ED", color:"#34C759", label:"✅ True" },
-  FALSE:      { bg:"#FFF0EF", color:"#FF3B30", label:"❌ False" },
-  MIXED:      { bg:"#FFF4E5", color:"#FF9500", label:"🤔 Mixed" },
-  UNVERIFIED: { bg:"#F5EEFF", color:"#AF52DE", label:"❓ Unverified" },
-};
-
-const gradeColor = (g) => {
-  if (!g) return "#AEAEB2";
-  const l = g[0];
-  if (l === "A") return "#34C759";
-  if (l === "B") return "#30D158";
-  if (l === "C") return "#FF9500";
-  if (l === "D") return "#FF6B00";
-  return "#FF3B30";
-};
+const css = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.5} }
+  body { font-family:'DM Sans',-apple-system,sans-serif; background:#F4F4F2; }
+  .bubble-grey { background:#EDEDED; border-radius:16px 16px 16px 3px; padding:13px 15px; position:relative; margin-bottom:16px; }
+  .bubble-grey::after { content:''; position:absolute; bottom:-8px; left:14px; border-left:8px solid transparent; border-right:3px solid transparent; border-top:9px solid #EDEDED; }
+  .bubble-red { background:#CC0000; border-radius:16px 16px 3px 16px; padding:13px 15px; position:relative; margin-bottom:8px; }
+  .bubble-red::after { content:''; position:absolute; bottom:-8px; right:14px; border-left:3px solid transparent; border-right:8px solid transparent; border-top:9px solid #CC0000; }
+  .claim-row { padding:14px 0; border-bottom:0.5px solid #E8E8E8; cursor:pointer; }
+  .claim-row:hover { opacity:0.85; }
+  .claim-row:last-child { border-bottom:none; }
+`;
 
 export default function Home() {
-  const [screen,  setScreen]  = useState("home");
-  const [results, setResults] = useState(null);
-  const [errMsg,  setErrMsg]  = useState("");
-  const [quipIdx, setQuipIdx] = useState(0);
-  const [streak,  setStreak]  = useState(0);
-  const [shared,  setShared]  = useState(false);
-  const quipTimer = useRef(null);
+  const [newspaper, setNewspaper] = useState(null);
+  const [loading,   setLoading]   = useState(true);
+  const [building,  setBuilding]  = useState(false);
+  const [article,   setArticle]   = useState(null); // { claim, region }
+  const [buildMsg,  setBuildMsg]  = useState("Scanning today's global news…");
+  const msgTimer = useRef(null);
 
-  const dateStr = new Date().toLocaleDateString("en-US", {
-    weekday:"long", month:"long", day:"numeric", year:"numeric"
-  });
-  const todayKey = new Date().toISOString().slice(0,10);
+  const BUILD_MSGS = [
+    "Scanning today's global news…",
+    "Fact-checking US & Allied claims…",
+    "Cross-referencing Russian statements…",
+    "Checking what China is saying…",
+    "Analysing Iran & Axis claims…",
+    "Reviewing Israeli statements…",
+    "Checking Gulf leaders…",
+    "Fact-checking the UN…",
+    "Calculating global honesty scores…",
+    "Building your daily newspaper…",
+  ];
 
-  // Load and update streak
   useEffect(() => {
-    try {
-      const data = JSON.parse(localStorage.getItem("ft_streak") || "{}");
-      const last = data.lastVisit;
-      const yesterday = new Date(Date.now()-864e5).toISOString().slice(0,10);
-      if (last === todayKey) {
-        setStreak(data.streak || 1);
-      } else if (last === yesterday) {
-        const newStreak = (data.streak || 0) + 1;
-        setStreak(newStreak);
-        localStorage.setItem("ft_streak", JSON.stringify({ streak: newStreak, lastVisit: todayKey }));
-      } else {
-        setStreak(1);
-        localStorage.setItem("ft_streak", JSON.stringify({ streak: 1, lastVisit: todayKey }));
-      }
-    } catch(e) {}
+    loadNewspaper();
   }, []);
 
-  useEffect(() => {
-    if (screen === "loading") {
-      setQuipIdx(0);
-      quipTimer.current = setInterval(() => setQuipIdx(i => (i+1) % QUIPS.length), 2800);
-    } else {
-      clearInterval(quipTimer.current);
-    }
-    return () => clearInterval(quipTimer.current);
-  }, [screen]);
-
-  async function blowTrumpet() {
-    setScreen("loading");
-    setErrMsg("");
-    setShared(false);
+  async function loadNewspaper() {
+    setLoading(true);
     try {
-      const res = await fetch("/api/factcheck", { method: "POST" });
+      const res = await fetch("/api/newspaper");
       const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Server error");
-      if (!data.data?.claims?.length) throw new Error("No claims returned");
-      setResults(data.data);
-      setScreen("results");
-    } catch (ex) {
-      setErrMsg(ex.message);
-      setScreen("error");
+      if (data.ok && data.data) {
+        setNewspaper(data.data);
+        setLoading(false);
+      } else {
+        // No cache — build it
+        await buildNewspaper();
+      }
+    } catch(e) {
+      await buildNewspaper();
     }
   }
 
-  function handleShare() {
-    const text = results?.shareText || `🎺 Today's Fact Trumpet Report: ${results?.summary}`;
-    const url = "https://fact-trumpet.vercel.app";
-    const fullText = `${text}\n\n${url}`;
-    if (navigator.share) {
-      navigator.share({ title: "The Fact Trumpet", text: fullText, url });
-    } else {
-      navigator.clipboard.writeText(fullText);
-      setShared(true);
-      setTimeout(() => setShared(false), 3000);
-    }
+  async function buildNewspaper() {
+    setBuilding(true);
+    setLoading(true);
+    let i = 0;
+    msgTimer.current = setInterval(() => {
+      i = (i+1) % BUILD_MSGS.length;
+      setBuildMsg(BUILD_MSGS[i]);
+    }, 4000);
+    try {
+      const res = await fetch("/api/newspaper", { method:"POST" });
+      const data = await res.json();
+      if (data.ok && data.data) {
+        setNewspaper(data.data);
+      }
+    } catch(e) {}
+    clearInterval(msgTimer.current);
+    setBuilding(false);
+    setLoading(false);
   }
 
-  const claims   = results?.claims || [];
-  const cnt      = claims.reduce((a,c) => { a[c.verdict]=(a[c.verdict]||0)+1; return a; }, {TRUE:0,FALSE:0,MIXED:0,UNVERIFIED:0});
-  const total    = Math.max(claims.length, 1);
-  const score    = Math.min(10, Math.max(0, Math.round(+results?.contradictionScore || 0)));
-  const scoreCol = score<=3?"#34C759":score<=6?"#FF9500":"#FF3B30";
-  const grade    = results?.dailyGrade || "?";
-  const gCol     = gradeColor(grade);
+  // ── ARTICLE VIEW ──
+  if (article) {
+    const { claim:c, region:r } = article;
+    const vs   = V[c.verdict]||V.UNVERIFIED;
+    const conf  = c.confidenceScore||3;
+    const confCol   = CONF_COLORS[conf]||"#8B4800";
+    const confLabel = CONF_LABELS[conf]||"Medium";
+    return (
+      <div style={{background:"#F4F4F2",minHeight:"100vh",paddingBottom:60,fontFamily:"'DM Sans',sans-serif",position:"relative",overflow:"hidden"}}>
+        <style>{css}</style>
+        <Head><title>{c.headline} — Making Accuracy Great Again</title></Head>
+        <WorldMap/>
+        <div style={{position:"relative",zIndex:1}}>
+          {/* Header */}
+          <div style={{borderBottom:"3px solid #CC0000",padding:"40px 20px 16px",background:"rgba(255,255,255,0.95)",backdropFilter:"blur(8px)",position:"sticky",top:0,zIndex:10}}>
+            <button onClick={()=>setArticle(null)} style={{background:"none",border:"none",color:"#CC0000",fontSize:14,fontWeight:600,cursor:"pointer",padding:0,marginBottom:12,fontFamily:"'DM Sans',sans-serif"}}>← Back to Today's Paper</button>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:20,color:"#1A1A1A"}}>Making Accuracy <span style={{color:"#CC0000"}}>Great Again</span></div>
+          </div>
 
-  if (screen === "loading") return (
-    <div style={S.overlay}>
-      <Head><title>Fact Trumpet — Loading…</title></Head>
-      <div style={S.spinner}/>
-      <div style={S.ovTitle}>Blowing the Trumpet…</div>
-      <div style={S.ovQuip}>{QUIPS[quipIdx]}</div>
-      <div style={{fontSize:12,color:"#AEAEB2",marginTop:4}}>Searching latest news — takes ~15 seconds</div>
+          <div style={{maxWidth:720,margin:"0 auto",padding:"0 0 40px"}}>
+            {/* Region label */}
+            <div style={{padding:"8px 20px",background:"#1A1A1A",borderBottom:"2px solid #CC0000",fontSize:11,color:"rgba(255,255,255,.6)",letterSpacing:2,textTransform:"uppercase",fontWeight:600}}>
+              {r.flag} {r.label}
+            </div>
+
+            <div style={{padding:"20px",background:"rgba(255,255,255,0.9)",backdropFilter:"blur(4px)"}}>
+
+              {/* 1. VERDICT + CONFIDENCE */}
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,paddingBottom:14,borderBottom:"2px solid #F0F0F0"}}>
+                <span style={{fontSize:13,fontWeight:700,padding:"6px 14px",background:vs.bg,color:vs.color}}>{vs.label}</span>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontSize:10,color:"#999"}}>Confidence</span>
+                  <div style={{display:"flex",gap:2}}>
+                    {[1,2,3,4,5].map(n=>(
+                      <div key={n} style={{width:4,height:14,background:n<=conf?confCol:"#E0E0E0",borderRadius:1}}/>
+                    ))}
+                  </div>
+                  <span style={{fontSize:10,color:confCol,fontWeight:700}}>{confLabel}</span>
+                </div>
+              </div>
+
+              {/* HEADLINE */}
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:28,color:"#1A1A1A",lineHeight:1.2,marginBottom:16}}>{c.headline}</div>
+
+              {/* 2. WHO */}
+              <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:12,paddingBottom:12,borderBottom:"0.5px solid #F0F0F0"}}>
+                <span style={{fontSize:22,flexShrink:0}}>{r.flag}</span>
+                <div>
+                  <div style={{fontSize:14,fontWeight:700,color:"#1A1A1A",marginBottom:3}}>{c.who}</div>
+                  {c.fullDate&&<div style={{fontSize:11,color:"#999",marginBottom:2}}>📅 {c.fullDate}</div>}
+                  {c.location&&<div style={{fontSize:11,color:"#999"}}>📍 {c.location}</div>}
+                </div>
+              </div>
+
+              {/* 3. QUOTE */}
+              <div style={{fontFamily:"'DM Serif Display',serif",fontStyle:"italic",fontSize:19,color:"#1A1A1A",lineHeight:1.55,marginBottom:12,paddingBottom:12,borderBottom:"0.5px solid #EEEEEE"}}>
+                "{c.quote}"
+              </div>
+
+              {/* 4. CONTEXT */}
+              {c.context&&(
+                <div style={{borderLeft:"3px solid #CC0000",paddingLeft:12,marginBottom:18,fontSize:12,color:"#666",lineHeight:1.6,fontStyle:"italic"}}>{c.context}</div>
+              )}
+
+              {/* 5. REALITY CHECK */}
+              <div style={{fontSize:9,letterSpacing:3,color:"#999",textTransform:"uppercase",fontWeight:600,marginBottom:8}}>Reality Check 🔍</div>
+              <div className="bubble-grey">
+                <div style={{fontSize:13,color:"#333",lineHeight:1.7}}>{c.explanation}</div>
+              </div>
+
+              {/* 6. OUR TAKE */}
+              <div style={{fontSize:9,letterSpacing:3,color:"#CC0000",textTransform:"uppercase",fontWeight:600,marginBottom:8,textAlign:"right"}}>📣 Our Take</div>
+              <div className="bubble-red">
+                <div style={{display:"flex",alignItems:"flex-start",gap:8}}>
+                  <span style={{fontSize:16,flexShrink:0}}>📣</span>
+                  <span style={{fontSize:13,fontStyle:"italic",color:"white",lineHeight:1.6}}>{c.quip}</span>
+                </div>
+              </div>
+
+              {/* 7. SAID THIS BEFORE */}
+              {c.relatedClaims&&c.relatedClaims.length>0&&(
+                <div style={{background:"#FAFAFA",padding:"12px 14px",marginBottom:14}}>
+                  <div style={{fontSize:9,letterSpacing:2,color:"#999",textTransform:"uppercase",fontWeight:600,marginBottom:10}}>Said This Before</div>
+                  {c.relatedClaims.map((rc,j)=>(
+                    <div key={j} style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,marginBottom:j<c.relatedClaims.length-1?8:0,paddingBottom:j<c.relatedClaims.length-1?8:0,borderBottom:j<c.relatedClaims.length-1?"0.5px solid #EEEEEE":"none"}}>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:12,color:"#333",marginBottom:2}}>{rc.claim}</div>
+                        <div style={{fontSize:10,color:"#AEAEB2"}}>{rc.date}</div>
+                      </div>
+                      <span style={{fontSize:10,fontWeight:700,padding:"3px 8px",background:(V[rc.verdict]||V.UNVERIFIED).bg,color:(V[rc.verdict]||V.UNVERIFIED).color,flexShrink:0}}>
+                        {(V[rc.verdict]||V.UNVERIFIED).label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* 8. SOURCE */}
+              {c.sourceUrl&&(
+                <div style={{display:"flex",alignItems:"center",gap:10,paddingTop:10,borderTop:"0.5px solid #F0F0F0"}}>
+                  <span style={{fontSize:10,color:"#999",fontWeight:700,letterSpacing:1,flexShrink:0}}>SOURCE</span>
+                  <a href={c.sourceUrl} target="_blank" rel="noopener noreferrer" style={{fontSize:12,color:"#CC0000",fontWeight:600,textDecoration:"none"}}>
+                    {c.sourceName||c.sourceUrl} →
+                  </a>
+                </div>
+              )}
+              {!c.sourceUrl&&c.sourceName&&(
+                <div style={{display:"flex",alignItems:"center",gap:10,paddingTop:10,borderTop:"0.5px solid #F0F0F0"}}>
+                  <span style={{fontSize:10,color:"#999",fontWeight:700,letterSpacing:1}}>SOURCE</span>
+                  <span style={{fontSize:12,color:"#CC0000",fontWeight:600}}>{c.sourceName}</span>
+                </div>
+              )}
+
+              <button onClick={()=>setArticle(null)} style={{marginTop:24,width:"100%",background:"#F5F5F5",border:"0.5px solid #E0E0E0",padding:14,fontSize:14,fontWeight:600,cursor:"pointer",color:"#555",fontFamily:"'DM Sans',sans-serif"}}>
+                ← Back to Today's Paper
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── LOADING / BUILDING ──
+  if (loading) return (
+    <div style={{minHeight:"100vh",background:"#F4F4F2",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:20,fontFamily:"'DM Sans',sans-serif",padding:40}}>
+      <style>{css}</style>
+      <Head><title>Making Accuracy Great Again</title></Head>
+      <div style={{fontSize:48}}>📣</div>
+      <div style={{fontFamily:"'DM Serif Display',serif",fontSize:26,color:"#1A1A1A",textAlign:"center"}}>
+        {building ? "Building Today's Paper…" : "Loading…"}
+      </div>
+      {building&&<div style={{fontSize:14,color:"#666",fontStyle:"italic",textAlign:"center",maxWidth:320,lineHeight:1.6,animation:"pulse 2s ease infinite"}}>{buildMsg}</div>}
+      {building&&<div style={{fontSize:12,color:"#999",textAlign:"center"}}>Fact-checking all 7 regions — takes about 2 minutes</div>}
+      <div style={{width:40,height:40,border:"2px solid #E0E0E0",borderTopColor:"#CC0000",borderRadius:"50%",animation:"spin .75s linear infinite"}}/>
     </div>
   );
 
-  if (screen === "error") return (
-    <div style={S.overlay}>
-      <Head><title>Fact Trumpet</title></Head>
-      <div style={{fontSize:48}}>🎺</div>
-      <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24,color:"#1C1C1E",marginBottom:8}}>Trumpet Jammed</div>
-      <div style={{fontSize:14,color:"#636366",textAlign:"center",maxWidth:300,lineHeight:1.6,marginBottom:24}}>{errMsg}</div>
-      <button style={S.againBtn} onClick={() => setScreen("home")}>Try Again</button>
+  // ── NEWSPAPER HOME ──
+  const np = newspaper;
+  if (!np) return (
+    <div style={{minHeight:"100vh",background:"#F4F4F2",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,fontFamily:"'DM Sans',sans-serif",padding:40}}>
+      <style>{css}</style>
+      <div style={{fontSize:36}}>📣</div>
+      <div style={{fontFamily:"'DM Serif Display',serif",fontSize:22,color:"#1A1A1A"}}>No paper today yet</div>
+      <button onClick={buildNewspaper} style={{background:"#CC0000",color:"white",border:"none",padding:"14px 28px",fontSize:15,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>
+        Build Today's Paper
+      </button>
     </div>
   );
 
-  if (screen === "home") return (
-    <div style={S.home}>
+  const gCol = gradeColor(np.globalGrade);
+
+  return (
+    <div style={{background:"#F4F4F2",minHeight:"100vh",fontFamily:"'DM Sans',sans-serif",position:"relative"}}>
+      <style>{css}</style>
       <Head>
-        <title>The Fact Trumpet — Daily Trump Fact Check</title>
-        <meta name="description" content="Live daily fact-checking of Trump's speeches, rallies, Truth Social posts and interviews"/>
-        <meta property="og:title" content="The Fact Trumpet"/>
-        <meta property="og:description" content="Live daily fact-checking of Trump's statements"/>
+        <title>Making Accuracy Great Again — {np.date}</title>
+        <meta name="description" content="Daily global fact-check newspaper. Because someone has to."/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
       </Head>
-      <div style={S.inner}>
+      <WorldMap/>
 
-        {/* Streak badge */}
-        {streak > 1 && (
-          <div style={S.streakBadge}>
-            🔥 {streak} day streak — keep it up!
+      <div style={{position:"relative",zIndex:1,maxWidth:720,margin:"0 auto"}}>
+
+        {/* ── MASTHEAD ── */}
+        <div style={{borderBottom:"3px solid #CC0000",padding:"28px 20px 16px",background:"rgba(255,255,255,0.95)",backdropFilter:"blur(8px)"}}>
+          <div style={{fontSize:9,letterSpacing:5,color:"#999",textTransform:"uppercase",marginBottom:8,textAlign:"center"}}>Est. 2026 · Global Fact Check · Non-Partisan</div>
+          <div style={{textAlign:"center",marginBottom:8}}>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:36,color:"#1A1A1A",lineHeight:1,letterSpacing:-1}}>
+              Making Accuracy<br/><span style={{color:"#CC0000"}}>Great Again</span>
+            </div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",borderTop:"0.5px solid #E8E8E8",paddingTop:10,marginTop:6}}>
+            <div style={{fontSize:11,color:"#999"}}>{np.date}</div>
+            <div style={{fontSize:11,color:"#999",fontStyle:"italic",fontFamily:"'DM Serif Display',serif"}}>"Because someone has to."</div>
+            <div style={{fontSize:11,color:"#999"}}>📣 maga.news</div>
+          </div>
+        </div>
+
+        {/* ── GLOBAL SCORE BANNER ── */}
+        <div style={{background:"#1A1A1A",padding:"16px 20px",borderBottom:"3px solid #CC0000",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div>
+            <div style={{fontSize:9,letterSpacing:3,color:"rgba(255,255,255,.4)",textTransform:"uppercase",marginBottom:4}}>Today's Global Truth Score</div>
+            <div style={{fontSize:14,color:"rgba(255,255,255,.8)",fontStyle:"italic",fontFamily:"'DM Serif Display',serif"}}>
+              {np.globalScore>=70 ? "An unusually honest day. Check outside — pigs may be flying." :
+               np.globalScore>=50 ? "About average. Which is not a compliment." :
+               np.globalScore>=30 ? "Another day, another avalanche of half-truths." :
+               "A dark day for accuracy. The truth has left the building."}
+            </div>
+          </div>
+          <div style={{textAlign:"center",flexShrink:0,marginLeft:16}}>
+            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:52,color:gCol,lineHeight:1}}>{np.globalGrade}</div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,.4)"}}>{np.globalScore}/100</div>
+          </div>
+        </div>
+
+        {/* ── TODAY'S BIGGEST LIE ── */}
+        {np.topClaim&&np.topRegion&&(
+          <div style={{background:"rgba(255,255,255,0.92)",borderBottom:"2px solid #1A1A1A",backdropFilter:"blur(4px)"}}>
+            <div style={{padding:"12px 20px 0"}}>
+              <div style={{fontSize:9,letterSpacing:3,color:"#CC0000",textTransform:"uppercase",fontWeight:700,marginBottom:10}}>━━ Today's Most Notable Claim ━━</div>
+            </div>
+            <div onClick={()=>setArticle({claim:np.topClaim, region:np.topRegion})} style={{padding:"0 20px 16px",cursor:"pointer"}}>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:26,color:"#1A1A1A",lineHeight:1.2,marginBottom:8}}>{np.topClaim.headline}</div>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+                <span style={{fontSize:12,fontWeight:700,padding:"4px 12px",background:(V[np.topClaim.verdict]||V.UNVERIFIED).bg,color:(V[np.topClaim.verdict]||V.UNVERIFIED).color}}>
+                  {(V[np.topClaim.verdict]||V.UNVERIFIED).label}
+                </span>
+                <span style={{fontSize:11,color:"#999"}}>{np.topRegion.flag} {np.topRegion.label} · {np.topClaim.who?.split(",")[0]}</span>
+              </div>
+              <div style={{fontFamily:"'DM Serif Display',serif",fontStyle:"italic",fontSize:15,color:"#555",lineHeight:1.5,marginBottom:8}}>"{np.topClaim.quote?.slice(0,120)}{np.topClaim.quote?.length>120?"…":""}"</div>
+              <div style={{fontSize:12,color:"#CC0000",fontWeight:600}}>Read full fact-check →</div>
+            </div>
           </div>
         )}
 
-        <div style={S.logoRow}>
-          <div style={{filter:"drop-shadow(0 6px 18px rgba(0,0,0,.15))"}}>
-            <TrumpHead size={82}/>
-          </div>
-          <div>
-            <div style={S.eyebrowSm}>Daily Edition</div>
-            <div style={S.logoName}>The Fact<br/><span style={{color:"#007AFF"}}>Trumpet</span></div>
-          </div>
-        </div>
+        {/* ── REGION SECTIONS ── */}
+        {(np.regions||[]).map((region, ri) => {
+          if (!region.claims?.length) return null;
+          const rCol = gradeColor(region.regionGrade);
+          return (
+            <div key={region.id} style={{background:"rgba(255,255,255,0.88)",borderBottom:"2px solid #1A1A1A",backdropFilter:"blur(4px)",animation:`fadeUp .3s ${ri*.05}s ease both`}}>
 
-        <p style={S.tagline}>"Making accuracy great again —<br/>one claim at a time"</p>
-
-        <div style={S.datePill}>
-          <div style={S.liveDot}/>{dateStr}
-        </div>
-
-        <button style={S.cta} onClick={blowTrumpet}>
-          <span style={{fontSize:36,display:"block",marginBottom:10,animation:"toot 3s ease-in-out infinite"}}>🎺</span>
-          <span style={{fontSize:24,fontWeight:700,letterSpacing:-0.4,display:"block",lineHeight:1.2}}>Blow the Trumpet!</span>
-          <span style={{fontSize:14,opacity:.82,display:"block",marginTop:5}}>Live fact-check of Trump's latest statements</span>
-        </button>
-
-        <div style={S.note}>Speeches · Rallies · Truth Social · News · Non-partisan</div>
-        <Link href="/history" style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#fff", border:"1px solid #E5E5EA", borderRadius:100, padding:"8px 20px", fontSize:13, fontWeight:500, color:"#007AFF", textDecoration:"none", marginTop:16, boxShadow:"0 2px 12px rgba(0,0,0,.05)" }}>
-          📈 View Honesty History
-        </Link>
-
-        {/* Bookmark prompt */}
-        <div style={S.bookmarkBox}>
-          <span style={{fontSize:20}}>📌</span>
-          <div>
-            <div style={{fontSize:13,fontWeight:600,color:"#1C1C1E",marginBottom:2}}>Check back every day</div>
-            <div style={{fontSize:12,color:"#636366"}}>Bookmark this page for your daily dose of reality</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div style={{background:"#F2F2F7",minHeight:"100vh",paddingBottom:70}}>
-      <Head><title>Fact Trumpet — Today's Report</title></Head>
-
-      <div style={S.rHeader}>
-        <button style={S.backBtn} onClick={() => { setScreen("home"); setResults(null); }}>← Back</button>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{display:"flex",alignItems:"center",gap:14}}>
-            <TrumpHead size={46}/>
-            <div>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:28,letterSpacing:-0.3}}>
-                Fact <span style={{color:"#007AFF"}}>Report</span>
-              </div>
-              <div style={{fontSize:13,color:"#AEAEB2",marginTop:2,fontWeight:500}}>{dateStr}</div>
-            </div>
-          </div>
-          {/* Share button in header */}
-          <button style={S.shareBtn} onClick={handleShare}>
-            {shared ? "✅ Copied!" : "🔗 Share"}
-          </button>
-        </div>
-      </div>
-
-      <div style={S.body}>
-
-        {/* Daily Score Card */}
-        <div style={{...S.card, animation:"fadeUp .4s ease both", background: `linear-gradient(135deg, #1C1C1E, #2C2C2E)`}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-            <div>
-              <div style={{fontSize:11,fontWeight:600,letterSpacing:2,textTransform:"uppercase",color:"rgba(255,255,255,.5)",marginBottom:6}}>Today's Honesty Score</div>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:16,fontStyle:"italic",color:"rgba(255,255,255,.8)",lineHeight:1.4,maxWidth:220}}>
-                {results.summary}
-              </div>
-            </div>
-            <div style={{flexShrink:0,textAlign:"center"}}>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:64,lineHeight:1,color:gCol,textShadow:`0 0 30px ${gCol}66`}}>{grade}</div>
-              <div style={{fontSize:13,color:"rgba(255,255,255,.5)",marginTop:2}}>{results.dailyScore}/100</div>
-            </div>
-          </div>
-          <div style={{fontSize:13,color:"rgba(255,255,255,.55)",fontStyle:"italic",lineHeight:1.5,borderTop:"1px solid rgba(255,255,255,.1)",paddingTop:12}}>
-            {results.dailyScoreDesc}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:12,marginBottom:20,animation:"fadeUp .4s .06s ease both"}}>
-          {[
-            {col:"#34C759",e:"✅",n:cnt.TRUE,       l:"Confirmed True"},
-            {col:"#FF3B30",e:"❌",n:cnt.FALSE,      l:"Straight-Up False"},
-            {col:"#FF9500",e:"🤔",n:cnt.MIXED,      l:"It's Complicated"},
-            {col:"#AF52DE",e:"❓",n:cnt.UNVERIFIED, l:"Who Knows"},
-          ].map((s,i) => (
-            <div key={i} style={{background:"#fff",borderRadius:12,padding:"18px 12px 14px",textAlign:"center",boxShadow:"0 4px 24px rgba(0,0,0,.07)",borderBottom:`3px solid ${s.col}`}}>
-              <div style={{fontSize:20,marginBottom:6}}>{s.e}</div>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:42,lineHeight:1,marginBottom:4,color:s.col}}>{s.n}</div>
-              <div style={{fontSize:11,fontWeight:600,letterSpacing:1.2,textTransform:"uppercase",color:"#AEAEB2"}}>{s.l}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Truth-O-Meter */}
-        <div style={{...S.card, animation:"fadeUp .4s .12s ease both"}}>
-          <div style={S.eyebrow}>Honesty Breakdown</div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:21,marginBottom:16}}>The Truth-O-Meter™</div>
-          <div style={{background:"#F2F2F7",borderRadius:100,height:14,overflow:"hidden",display:"flex",marginBottom:12}}>
-            {[{col:"#34C759",pct:cnt.TRUE/total*100},{col:"#FF9500",pct:cnt.MIXED/total*100},{col:"#FF3B30",pct:cnt.FALSE/total*100},{col:"#AF52DE",pct:cnt.UNVERIFIED/total*100}]
-              .map((s,i) => <div key={i} style={{height:"100%",width:`${s.pct.toFixed(1)}%`,background:s.col}}/>)}
-          </div>
-          <div style={{display:"flex",flexWrap:"wrap",gap:12}}>
-            {[{col:"#34C759",l:`True (${cnt.TRUE})`},{col:"#FF9500",l:`Mixed (${cnt.MIXED})`},{col:"#FF3B30",l:`False (${cnt.FALSE})`},{col:"#AF52DE",l:`Unverified (${cnt.UNVERIFIED})`}]
-              .map((s,i) => (
-                <div key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,color:"#3A3A3C"}}>
-                  <div style={{width:8,height:8,borderRadius:"50%",background:s.col}}/>{s.l}
-                </div>
-              ))}
-          </div>
-        </div>
-
-        {/* Flip-Flop Index */}
-        <div style={{...S.card, animation:"fadeUp .4s .18s ease both"}}>
-          <div style={S.eyebrow}>Flip-Flop Index</div>
-          <div style={{display:"flex",alignItems:"center",gap:22}}>
-            <div style={{flexShrink:0,width:86,height:86,borderRadius:"50%",border:`4px solid ${scoreCol}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:scoreCol}}>
-              <span style={{fontFamily:"'DM Serif Display',serif",fontSize:30,lineHeight:1}}>{score}</span>
-              <span style={{fontSize:10,fontWeight:600,letterSpacing:1,textTransform:"uppercase",opacity:.65}}>/ 10</span>
-            </div>
-            <div>
-              <div style={{fontFamily:"'DM Serif Display',serif",fontSize:18,fontStyle:"italic",marginBottom:6}}>{results.contradictionHeadline}</div>
-              <div style={{fontSize:14,color:"#636366",lineHeight:1.65}}>{results.contradictionDesc}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Claims */}
-        <div style={{animation:"fadeUp .4s .24s ease both"}}>
-          <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",marginBottom:14}}>
-            <div style={{fontFamily:"'DM Serif Display',serif",fontSize:24}}>What He Said</div>
-            <span style={{background:"#E8F1FF",color:"#007AFF",fontSize:13,fontWeight:600,padding:"3px 11px",borderRadius:100}}>{claims.length} claims</span>
-          </div>
-          {claims.map((c,i) => {
-            const vs = V[c.verdict]||V.UNVERIFIED;
-            return (
-              <div key={i} style={{background:"#fff",borderRadius:20,marginBottom:14,boxShadow:"0 4px 24px rgba(0,0,0,.07)",overflow:"hidden",animation:`fadeUp .4s ${i*.07}s ease both`}}>
-                <div style={{padding:"18px 18px 0"}}>
-                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                    <span style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:12,fontWeight:600,padding:"5px 13px",borderRadius:100,background:vs.bg,color:vs.color}}>{vs.label}</span>
-                    <span style={{fontSize:11,color:"#AEAEB2",fontWeight:500}}>{c.source}</span>
-                  </div>
-                  <div style={{fontFamily:"'DM Serif Display',serif",fontStyle:"italic",fontSize:17,lineHeight:1.55,paddingBottom:16,borderBottom:"1px solid #E5E5EA"}}>
-                    "{c.quote}"
-                  </div>
-                </div>
-                <div style={{padding:"14px 18px 18px",background:"#F9F9FB"}}>
-                  <div style={{fontSize:10,fontWeight:700,letterSpacing:2,textTransform:"uppercase",color:"#AEAEB2",marginBottom:7}}>The Real Tea ☕</div>
-                  <div style={{fontSize:14,lineHeight:1.72,color:"#3A3A3C"}}>{c.explanation}</div>
-                  <div style={{marginTop:12,background:"#fff",borderRadius:12,padding:"11px 14px",display:"flex",gap:10,alignItems:"flex-start",border:"1px solid #E5E5EA"}}>
-                    <span style={{fontSize:17,flexShrink:0,marginTop:1}}>🎺</span>
-                    <span style={{fontSize:13,fontStyle:"italic",color:"#636366",lineHeight:1.6}}>{c.quip}</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Sources */}
-        <div style={{...S.card, animation:"fadeUp .4s .30s ease both"}}>
-          <div style={S.eyebrow}>Receipts 🧾</div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:21,marginBottom:14}}>Checked Against</div>
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            {(results.sources||[]).map((s,i) => (
-              <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:"#F2F2F7",borderRadius:12}}>
-                <div style={{width:36,height:36,borderRadius:8,background:"#E8F1FF",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{s.emoji}</div>
+              {/* Region header */}
+              <div style={{padding:"12px 20px",borderBottom:"0.5px solid #E8E8E8",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div>
-                  <div style={{fontSize:14,fontWeight:600,color:"#1C1C1E"}}>{s.name}</div>
-                  <div style={{fontSize:12,color:"#AEAEB2",marginTop:2}}>{s.desc}</div>
+                  <div style={{fontSize:9,letterSpacing:3,color:"#CC0000",textTransform:"uppercase",fontWeight:700,marginBottom:3}}>━━ {region.flag} {region.label} ━━</div>
+                  <div style={{fontSize:11,color:"#999"}}>{region.who}</div>
+                </div>
+                <div style={{textAlign:"center",flexShrink:0}}>
+                  <div style={{fontFamily:"'DM Serif Display',serif",fontSize:32,color:rCol,lineHeight:1}}>{region.regionGrade}</div>
+                  <div style={{fontSize:9,color:"#CCC"}}>{region.regionScore}/100</div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Share + come back tomorrow */}
-        <div style={{...S.card, animation:"fadeUp .4s .36s ease both", textAlign:"center"}}>
-          <div style={{fontSize:28,marginBottom:8}}>📣</div>
-          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:18,marginBottom:6}}>Share today's report</div>
-          <div style={{fontSize:13,color:"#636366",marginBottom:16,lineHeight:1.5}}>
-            {results.shareText}
-          </div>
-          <button style={{...S.againBtn, marginTop:0, marginBottom:12}} onClick={handleShare}>
-            {shared ? "✅ Copied to clipboard!" : "🔗 Share The Fact Trumpet"}
-          </button>
-          <div style={{fontSize:12,color:"#AEAEB2"}}>New fact-check every day · Bookmark fact-trumpet.vercel.app</div>
-        </div>
+              {/* Region summary */}
+              <div style={{padding:"10px 20px",background:"#FAFAFA",borderBottom:"0.5px solid #E8E8E8",fontSize:12,color:"#555",fontStyle:"italic",fontFamily:"'DM Serif Display',serif",lineHeight:1.5}}>
+                {region.regionSummary}
+              </div>
 
-        <button style={{...S.againBtn, background:"#F2F2F7", color:"#007AFF", boxShadow:"none", border:"1px solid #E5E5EA"}}
-          onClick={() => { setScreen("home"); setResults(null); }}>
-          ← Check Again
-        </button>
+              {/* Claim headlines */}
+              <div style={{padding:"0 20px"}}>
+                {(region.claims||[]).map((c,ci)=>{
+                  const vs = V[c.verdict]||V.UNVERIFIED;
+                  return (
+                    <div key={ci} className="claim-row" onClick={()=>setArticle({claim:c,region})}>
+                      <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
+                        <span style={{fontSize:11,fontWeight:700,padding:"3px 8px",background:vs.bg,color:vs.color,flexShrink:0,marginTop:2}}>
+                          {vs.short}
+                        </span>
+                        <div style={{flex:1}}>
+                          <div style={{fontFamily:"'DM Serif Display',serif",fontSize:16,color:"#1A1A1A",lineHeight:1.3,marginBottom:4}}>{c.headline}</div>
+                          <div style={{fontSize:11,color:"#999"}}>{c.who?.split(",")[0]} · {c.fullDate||c.source}</div>
+                        </div>
+                        <div style={{fontSize:14,color:"#CC0000",fontWeight:700,flexShrink:0,marginTop:2}}>→</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+          );
+        })}
+
+        {/* ── FOOTER ── */}
+        <div style={{padding:"20px",background:"rgba(255,255,255,0.85)",borderTop:"2px solid #1A1A1A",textAlign:"center"}}>
+          <div style={{fontSize:9,letterSpacing:3,color:"#999",textTransform:"uppercase",marginBottom:8}}>Making Accuracy Great Again</div>
+          <div style={{fontSize:12,color:"#999",fontStyle:"italic",marginBottom:12,fontFamily:"'DM Serif Display',serif"}}>"Because someone has to."</div>
+          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+            <button onClick={()=>{const url="https://maga.news";if(navigator.share){navigator.share({title:"Making Accuracy Great Again",url});}else{navigator.clipboard.writeText(url);}}} style={{background:"#CC0000",color:"white",border:"none",padding:"11px 22px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>
+              🔗 Share Today's Paper
+            </button>
+            <Link href="/history" style={{background:"#F5F5F5",color:"#555",border:"0.5px solid #E0E0E0",padding:"11px 22px",fontSize:13,fontWeight:600,textDecoration:"none",display:"inline-block"}}>
+              📊 Score History
+            </Link>
+            <button onClick={buildNewspaper} style={{background:"#1A1A1A",color:"white",border:"none",padding:"11px 22px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>
+              🔄 Refresh Paper
+            </button>
+          </div>
+          <div style={{fontSize:10,color:"#CCC",marginTop:14}}>Updates daily · Cached for 24 hours · Non-partisan fact-checking</div>
+        </div>
 
       </div>
     </div>
   );
 }
-
-const S = {
-  home:        { background:"linear-gradient(155deg,#FAFAFA,#EEEFF5)", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"40px 24px" },
-  inner:       { maxWidth:440, width:"100%", textAlign:"center" },
-  streakBadge: { display:"inline-flex", alignItems:"center", gap:6, background:"linear-gradient(135deg,#FF9500,#FF6B00)", color:"white", fontSize:13, fontWeight:600, padding:"6px 16px", borderRadius:100, marginBottom:24, boxShadow:"0 4px 12px rgba(255,149,0,.3)" },
-  logoRow:     { display:"flex", alignItems:"center", justifyContent:"center", gap:20, marginBottom:14 },
-  eyebrowSm:   { fontSize:11, fontWeight:500, letterSpacing:3, textTransform:"uppercase", color:"#AEAEB2", marginBottom:3 },
-  logoName:    { fontFamily:"'DM Serif Display',Georgia,serif", fontSize:40, lineHeight:1, letterSpacing:-0.5, color:"#1C1C1E" },
-  tagline:     { fontSize:16, fontWeight:300, color:"#636366", fontStyle:"italic", lineHeight:1.65, margin:"10px 0 36px" },
-  datePill:    { display:"inline-flex", alignItems:"center", gap:8, background:"#fff", border:"1px solid #E5E5EA", borderRadius:100, padding:"7px 18px", fontSize:13, fontWeight:500, color:"#636366", marginBottom:40, boxShadow:"0 4px 24px rgba(0,0,0,.07)" },
-  liveDot:     { width:7, height:7, borderRadius:"50%", background:"#34C759", animation:"pulse 2s ease-in-out infinite" },
-  cta:         { width:"100%", background:"#007AFF", color:"#fff", border:"none", borderRadius:22, padding:"26px 32px", cursor:"pointer", marginBottom:18, boxShadow:"0 10px 40px rgba(0,122,255,.38)", fontFamily:"'DM Sans',sans-serif" },
-  note:        { fontSize:12, color:"#AEAEB2", lineHeight:1.6, marginBottom:24 },
-  bookmarkBox: { display:"flex", alignItems:"center", gap:12, background:"white", border:"1px solid #E5E5EA", borderRadius:16, padding:"14px 16px", textAlign:"left", boxShadow:"0 2px 12px rgba(0,0,0,.05)" },
-  overlay:     { minHeight:"100vh", background:"rgba(242,242,247,.98)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:16 },
-  spinner:     { width:52, height:52, border:"3px solid #E5E5EA", borderTopColor:"#007AFF", borderRadius:"50%", animation:"spin .75s linear infinite" },
-  ovTitle:     { fontFamily:"'DM Serif Display',serif", fontSize:24, color:"#1C1C1E" },
-  ovQuip:      { fontSize:15, color:"#636366", fontStyle:"italic", textAlign:"center", maxWidth:280, lineHeight:1.5 },
-  rHeader:     { background:"rgba(255,255,255,.95)", borderBottom:"1px solid #E5E5EA", padding:"40px 22px 20px", position:"sticky", top:0, zIndex:10, backdropFilter:"blur(20px)" },
-  backBtn:     { display:"inline-flex", alignItems:"center", gap:6, background:"none", border:"none", color:"#007AFF", fontFamily:"'DM Sans',sans-serif", fontSize:17, cursor:"pointer", marginBottom:16, padding:0 },
-  shareBtn:    { background:"#F2F2F7", border:"1px solid #E5E5EA", borderRadius:100, padding:"8px 16px", fontSize:13, fontWeight:600, color:"#1C1C1E", cursor:"pointer", fontFamily:"'DM Sans',sans-serif" },
-  body:        { maxWidth:760, margin:"0 auto", padding:"26px 18px 70px" },
-  card:        { background:"#fff", borderRadius:20, padding:22, marginBottom:20, boxShadow:"0 4px 24px rgba(0,0,0,.07)" },
-  eyebrow:     { fontSize:11, fontWeight:600, letterSpacing:2, textTransform:"uppercase", color:"#AEAEB2", marginBottom:10 },
-  againBtn:    { width:"100%", background:"#007AFF", color:"#fff", border:"none", borderRadius:12, padding:17, fontFamily:"'DM Sans',sans-serif", fontSize:16, fontWeight:600, cursor:"pointer", marginTop:6, boxShadow:"0 4px 16px rgba(0,122,255,.28)" },
-};
