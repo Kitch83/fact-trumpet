@@ -125,6 +125,10 @@ export default async function handler(req, res) {
         console.error(`Failed region ${region.id}:`, e.message);
         results.push({ id:region.id, flag:region.flag, label:region.label, who:region.who, regionGrade:"?", regionScore:0, regionSummary:"Could not retrieve data for this region today.", claims:[] });
       }
+      // Wait 15 seconds between each region to avoid rate limits
+      if (region !== REGIONS[REGIONS.length - 1]) {
+        await new Promise(r => setTimeout(r, 15000));
+      }
     }
 
     // Global score
@@ -167,4 +171,4 @@ export default async function handler(req, res) {
   }
 }
 
-export const config = { api: { responseLimit:"8mb", bodyParser:{ sizeLimit:"4mb" } } };
+export const config = { api: { responseLimit:"8mb", bodyParser:{ sizeLimit:"4mb" } }, maxDuration: 300 };
