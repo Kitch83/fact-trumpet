@@ -141,17 +141,28 @@ Return ONLY raw JSON — no markdown, no backticks:
   "sources": [{"emoji":"📰","name":"Source name","desc":"e.g. CNN, Truth Social, State TV"}],
   "claims": [{
     "quote": "Exact or close paraphrase of the claim",
-    "who": "Name and title of who said it",
-    "source": "Event type · Actual date",
+    "who": "Full name and title e.g. Donald Trump, President of the United States",
+    "fullDate": "Full date e.g. Wednesday, 26 March 2026",
+    "location": "Where it was said e.g. White House Press Briefing, Washington D.C.",
+    "context": "1 sentence explaining why they made this claim and what prompted it",
+    "source": "Event type · Full date",
+    "sourceUrl": "Direct URL to the news article or official source if available, else null",
+    "sourceName": "Name of the source e.g. Reuters, BBC News, Truth Social",
     "verdict": "TRUE",
     "explanation": "2-3 accurate factual sentences, no partisan spin",
-    "quip": "Dry aside, max 12 words"
+    "quip": "Dry aside, max 12 words",
+    "confidenceScore": 4,
+    "relatedClaims": [
+      {"claim": "Brief description of a similar previous claim", "date": "Month Year", "verdict": "FALSE"}
+    ]
   }]
 }
 verdict = TRUE | FALSE | MIXED | UNVERIFIED
 contradictionScore = integer 0-10
 dailyScore = integer 0-100 (100 = perfectly honest)
-dailyGrade = letter grade A/B/C/D/F with optional +/-`
+dailyGrade = letter grade A/B/C/D/F with optional +/-
+confidenceScore = integer 1-5 (5=very high confidence, 1=very low)
+relatedClaims = array of up to 2 similar past claims by the same person, or empty array if none known`
       }]
     });
 
