@@ -1,7 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { -webkit-font-smoothing: antialiased; }
 body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: #F2F2F7; color: #1C1C1E; }
+
 @keyframes spin    { to { transform: rotate(360deg); } }
 @keyframes toot    { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-14deg)} 40%{transform:rotate(14deg)} 60%{transform:rotate(-7deg)} 80%{transform:rotate(7deg)} }
 @keyframes fadeUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
