@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { getIllustration } from "./illustrations";
+import { getIllustration } from "../lib/illustrations";
 
 const V = {
   TRUE:       { bg:"#E8F9ED", color:"#1a7a35", label:"✅ True",       short:"TRUE"  },
